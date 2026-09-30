@@ -48,7 +48,7 @@ button{font:inherit;cursor:pointer;border:0;color:#fff}
 #spin:disabled,#auto:disabled{filter:grayscale(.7) brightness(.7);cursor:default}
 #auto{width:64px;border-radius:10px;background:#2b1660;border:2px solid var(--line);font-size:12px;font-weight:700}
 #auto.on{background:var(--gold);color:#000;border-color:#fff}
-#inv{margin-top:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+#inv{margin-top:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .slot{background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:4px;position:relative;height:66px;display:flex;align-items:center;justify-content:center}
 .slot img{max-width:100%;max-height:100%;object-fit:contain;opacity:.25;filter:grayscale(1)}
 .slot.has img{opacity:1;filter:none}
@@ -109,10 +109,9 @@ const COMPLETE = 'assets/complete.png';
 // need: 합성에 필요한 개수 / odds: 스핀당 당첨 확률(화면에는 표시하지 않음)
 const PARTS = {
   head:  {src:'assets/head.png',  need:3, odds:.2},
-  left:  {src:'assets/left.png',  need:1, odds:.1},
-  right: {src:'assets/right.png', need:1, odds:.1},
+  left:  {src:'assets/left.png',  need:2, odds:.1},
+  right: {src:'assets/right.png', need:2, odds:.1},
   body:  {src:'assets/body.png',  need:1, odds:.1},
-  leg:   {src:'assets/leg.png',   need:2, odds:.1},
 };
 const KEYS = Object.keys(PARTS);
 const REELS = 3, H = 96, STORE = 'mango-pachinko';

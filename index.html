@@ -50,6 +50,10 @@ button{font:inherit;cursor:pointer;border:0;color:#fff}
 .slot.pop{animation:pop .5s}
 @keyframes pop{40%{transform:scale(1.15)}}
 #info{margin-top:6px;font-size:10px;text-align:center;opacity:.65}
+#done{position:absolute;right:8px;top:6px;display:flex;align-items:center;gap:4px;background:#000a;border:1px solid var(--gold);border-radius:14px;padding:1px 8px 1px 4px;height:26px}
+#done img{height:20px;width:20px;object-fit:contain;filter:brightness(0) opacity(.6)}
+#done.has img{filter:drop-shadow(0 0 4px var(--gold))}
+#done b{font-size:13px;color:var(--gold);min-width:10px;text-align:center}
 #reset{position:absolute;left:8px;top:8px;background:none;font-size:10px;opacity:.4;text-decoration:underline}
 #log{position:fixed;right:10px;bottom:10px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none;z-index:30}
 .toast{display:flex;align-items:center;gap:6px;background:#000c;border:1px solid var(--gold);border-radius:6px;padding:3px 8px;font-size:13px;
@@ -79,12 +83,13 @@ body.shake #machine{animation:shake .08s infinite}
 <body>
 <div id="bulbs"></div>
 <div id="machine">
+  <div id="done" title="완성품"><img src="assets/complete.png" alt=""><b id="doneN">?</b></div>
   <button id="reset" title="저장된 진행 초기화">초기화</button>
   <h1>🎰 망고 파칭코<small>MANGO PACHINKO</small></h1>
   <div id="reels"><div id="payline"></div></div>
   <div id="ctrl"><button id="spin">SPIN</button><button id="auto">AUTO</button></div>
   <div id="inv"></div>
-  <div id="info">3개가 같으면 부위 획득 · 머리는 확률 2배 · 머리 ×3 + 왼팔 + 오른팔 + 몸통 = 합성!</div>
+  <div id="info">3개가 같으면 부위 획득 · 머리 ×3 + 왼팔 + 오른팔 + 몸통 = 합성!</div>
 </div>
 <button id="combine">✨ 합성 ✨</button>
 <div id="veil"></div><canvas id="fx"></canvas>
@@ -115,6 +120,14 @@ const save = () => { try{localStorage.setItem('mango-pachinko',JSON.stringify(st
     e.style.background=e.style.boxShadow=''; b.appendChild(e);} }
 })();
 
+// 스핀 결과: 머리 20%, 왼팔/오른팔/몸통 각 10%, 나머지는 꽝 (UI에는 노출하지 않음)
+const ODDS = [['head',.2],['left',.1],['right',.1],['body',.1]];
+function rollSpin(){
+  let r=Math.random();
+  for(const [k,p] of ODDS){ if((r-=p)<0) return [k,k,k]; }
+  let res; do{ res=Array.from({length:REELS},pick); }while(res.every(k=>k===res[0]));
+  return res;
+}
 const pick = () => { let r=Math.random()*TOTAL_W; for(const k of KEYS){ if((r-=IMG[k].w)<0) return k; } return KEYS[0]; };
 const cellHTML = k => `<div class="cell"><img src="${IMG[k].src}" draggable="false"></div>`;
 
@@ -139,6 +152,8 @@ function log(k, n, big){
 function render(){
   $('#inv').innerHTML = KEYS.map(k=>`<div class="slot ${state[k]>=IMG[k].need?'has':''}" data-k="${k}"><img src="${IMG[k].src}"><b>${state[k]}/${IMG[k].need}</b></div>`).join('');
   $('#combine').classList.toggle('show', canCombine());
+  $('#doneN').textContent = state.complete>0 ? '×'+state.complete : '?';
+  $('#done').classList.toggle('has', state.complete>0);
   save();
 }
 const canCombine = () => KEYS.every(k=>state[k]>=IMG[k].need);
@@ -150,7 +165,7 @@ function spin(){
   if(spinning||canCombine()) return;
   setBusy(true);
   $('#reels').classList.remove('win');
-  const res = Array.from({length:REELS},pick);
+  const res = rollSpin();
   let done=0;
   reels.forEach((r,i)=>{
     const n = 18 + i*8;                       // 오른쪽 릴일수록 더 오래 돈다
